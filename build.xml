@@ -1,0 +1,33 @@
+<project name="TicTacToe" default="run" basedir=".">
+
+    <!-- Properties -->
+    <property name="src.dir" value="src"/>
+    <property name="build.dir" value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="main.class" value="TicTacToe"/>
+
+    <!-- Clean -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <!-- Create build directories -->
+    <target name="init">
+        <mkdir dir="${classes.dir}"/>
+    </target>
+
+    <!-- Compile -->
+    <target name="compile" depends="init">
+        <javac srcdir="${src.dir}"
+               destdir="${classes.dir}"
+               includeantruntime="false"/>
+    </target>
+
+    <!-- Run -->
+    <target name="run" depends="compile">
+        <java classname="${main.class}" fork="true" classpath="${classes.dir}">
+            <arg value="moves.txt"/>
+        </java>
+    </target>
+
+</project>
