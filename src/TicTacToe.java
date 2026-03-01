@@ -54,10 +54,30 @@ public class TicTacToe {
             System.exit(-1);
         }
         // Teach the AI program using the data
+        System.out.println("Loaded " + moves.size() + " moves successfully.");
     }
 
     private static List<Move> loadMoves(String filename) {
-        return null;
+        TicTacToe game = new TicTacToe(); // Needed for non-static inner class
+
+        try {
+            return java.nio.file.Files.lines(java.nio.file.Paths.get(filename))
+                    .map(String::trim) // Remove whitespace
+                    .filter(line -> !line.isEmpty()) // Skip empty lines
+                    .map(line -> {
+                        String[] parts = line.split("\\s+");
+
+                        Move move = game.new Move(); // Use the TicTacToe instance
+                        move.symbol = parseSymbol(parts[0]);
+                        move.location = parseInt(parts[1]);
+                        return move;
+                    })
+                    .filter(java.util.Objects::nonNull) // Remove nulls from invalid lines
+                    .toList();
+        } catch (java.io.IOException e) {
+            System.err.println("Error reading file: " + filename);
+            return null;
+        }
     }
 
     private static int parseInt(String num) {
