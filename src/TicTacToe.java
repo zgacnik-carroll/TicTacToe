@@ -64,7 +64,7 @@ public class TicTacToe {
             return java.nio.file.Files.lines(java.nio.file.Paths.get(filename))
                     .map(String::trim) // Remove whitespace
                     .map(line -> {
-                        String[] parts = line.split("\\s+");
+                        String[] parts = line.split("\\s+"); // Splits at whitespace
                         Move move = game.new Move(); // Use the TicTacToe instance
                         move.symbol = parseSymbol(parts[0]);
                         move.location = parseInt(parts[1]);
