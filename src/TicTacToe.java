@@ -1,3 +1,9 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,9 +31,14 @@ public class TicTacToe {
         }
     }
 
-    private class Move {
-        Symbol symbol;
-        int location;
+    private static class Move {
+        final Symbol symbol;
+        final int location;
+
+        Move(Symbol symbol, int location) {
+            this.symbol = symbol;
+            this.location = location;
+        }
     }
 
     public static void main(String[] args) {
@@ -54,28 +65,28 @@ public class TicTacToe {
             System.exit(-1);
         }
         // Teach the AI program using the data
-        System.out.println("Loaded " + moves.size() + " moves successfully.");
     }
 
     private static List<Move> loadMoves(String filename) {
-        TicTacToe game = new TicTacToe(); // Needed for non-static inner class
-
-        try {
-            return java.nio.file.Files.lines(java.nio.file.Paths.get(filename))
-                    .map(String::trim) // Remove whitespace
-                    .map(line -> {
-                        String[] parts = line.split("\\s+"); // Splits at whitespace
-                        Move move = game.new Move(); // Use the TicTacToe instance
-                        move.symbol = parseSymbol(parts[0]);
-                        move.location = parseInt(parts[1]);
-                        return move;
-                    })
-                    .filter(java.util.Objects::nonNull) // Remove nulls from invalid lines
-                    .toList();
-        } catch (java.io.IOException e) {
-            System.err.println("Error reading file: " + filename);
-            return null;
+        final List<Move> moves = new ArrayList<>();
+        final File file = new File(filename);
+        if (file.exists()) {
+            try (FileReader fileReader = new FileReader(file);
+                 BufferedReader br = new BufferedReader(fileReader)) {
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    final Move m = parseMove(line);
+                    if (m != null) {
+                        moves.add(m);
+                    } else {
+                        System.err.println("Error: Invalid move '" + line + "'");
+                    }
+                }
+            } catch (IOException ignored) {}
+        } else {
+            System.err.println("File '" + filename + "' not found");
         }
+        return moves;
     }
 
     private static int parseInt(String num) {
@@ -83,6 +94,14 @@ public class TicTacToe {
             return Integer.parseInt(num);
         } catch (NumberFormatException ignored) {}
         return 0;
+    }
+
+    private static Move parseMove(String line) {
+        final String[] fields = line.split("\\s+");
+        if (fields.length == 2) {
+            return new Move(parseSymbol(fields[0]), parseInt(fields[1]));
+        }
+        return null;
     }
 
     private static Symbol parseSymbol(String symbol) {
@@ -128,7 +147,7 @@ public class TicTacToe {
 
         // Continue validation on number of moves
         if (moves.size() != numSquares) {
-            System.err.println("Error: Number of moves does not match number of squares");
+            System.err.println("Error: Number of moves (" + moves.size() + ") does not match number of squares (" + numSquares + ")");
             success = false;
         }
 
@@ -136,6 +155,10 @@ public class TicTacToe {
         final Set<Integer> usedLocations = new HashSet<>();
         Symbol nextMove = first;
         for (Move m : moves) {
+            if (m.location < 1 || m.location > numSquares) {
+                System.err.println("Error: Invalid location '" + m.location + "'");
+                success = false;
+            }
             if (m.symbol == Symbol.INVALID) {
                 System.err.println("Error: At least one of the moves has an invalid Symbol");
                 success = false;
